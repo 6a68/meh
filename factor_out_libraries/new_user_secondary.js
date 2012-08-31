@@ -9,7 +9,6 @@ vows = require('vows'),
 path = require('path'),
 wd = require('wd'),
 assert = require('assert'),
-request = require('request'),
 restmail = require('./lib/restmail.js'),
 utils = require('./lib/utils.js');
 
