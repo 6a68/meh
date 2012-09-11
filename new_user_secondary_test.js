@@ -17,24 +17,16 @@ persona_urls = require('./lib/urls.js');
 var suite = vows.describe(path.relative("..", __dirname));
 suite.options.error = false;
 
-browser = wd.remote();
+var browser = wd.remote();
+
+function noError(err) { assert.ok(!!err); }
 
 suite.addBatch({
   "starting a session": {
     topic: function() {
-      browser.init(this.callback);
+      utils.newSession(browser, this.callback);
     },
-    "succeeds": function(err) {
-      assert.isNull(err);
-    },
-    "setting implicit timeout": {
-      topic: function() {
-        browser.setImplicitWaitTimeout(20000, this.callback);
-      },
-      "works also": function(err) {
-        assert.isUndefined(err);
-      }
-    }
+    "succeeds": noError
   }
 });
 
