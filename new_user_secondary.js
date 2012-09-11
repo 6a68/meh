@@ -9,20 +9,15 @@ vows = require('vows'),
 path = require('path'),
 wd = require('wd'),
 assert = require('assert'),
-request = require('request');
+restmail = require('./lib/restmail.js'),
+utils = require('./lib/utils.js'),
+persona_urls = require('./lib/urls.js');
 
 // setup
 var suite = vows.describe(path.relative("..", __dirname));
 suite.options.error = false;
 
 browser = wd.remote();
-
-const URLS = {
-  "123done": 'http://dev.123done.org',
-  persona: 'https://login.dev.anosrep.org',
-  myfavoritebeer: 'https://login.dev.anosrep.org',
-  eyedeeme: 'https://eyedee.me',
-};
 
 suite.addBatch({
   "starting a session": {
@@ -46,7 +41,7 @@ suite.addBatch({
 suite.addBatch({
   "loading sample rp": {
     topic: function() {
-      browser.get(URLS["123done"], this.callback);
+      browser.get(persona_urls["123done"], this.callback);
     },
     "succeeds": function(err, foo) {
       assert.isUndefined(err);
@@ -54,32 +49,7 @@ suite.addBatch({
   }
 });
 
-function waitFor(poll, timeout, check, complete) {
-  var startTime = new Date();
-  function doit() {
-    check(function(done) {
-      if (done || ((new Date() - startTime) > timeout)) {
-        complete.apply(null, Array.prototype.slice.call(arguments, 1));
-      } else {
-        setTimeout(doit, poll);
-      }
-    });
-  }
-  setTimeout(doit, poll);
-}
-
-function randomEmail(chars) {
-  var str = "";
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-  for (var i=0; i < chars; i++) {
-    str += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-  }
-
-  return str + '@restmail.net';
-};
-
-const theEmail = randomEmail(10);
+const theEmail = restmail.randomEmail(10);
 
 suite.addBatch({
   "finding button": {
@@ -89,7 +59,7 @@ suite.addBatch({
     "visibility": {
       topic: function(err, element) {
         var self = this;
-        waitFor(100, 3000, function(done) {
+        utils.waitFor(100, 3000, function(done) {
           browser.displayed(element, function(err, displayed) {
             done(!err && displayed, err, displayed);
           });
@@ -105,16 +75,12 @@ suite.addBatch({
         topic: function(err, element) {
           browser.clickElement(element, this.callback);
         },
-        "succeeds": function(err) {
-          assert.isUndefined(err);
-        },
+        "succeeds": function(err) { assert.isUndefined(err); },
         "and selecting the dialog window": {
           topic: function() {
             browser.window("__persona_dialog", this.callback);
           },
-          "succeeds": function(err) {
-            assert.isUndefined(err);
-          },
+          "succeeds": function(err) { assert.isUndefined(err); },
           "and the title": {
             topic: function() {
               browser.title(this.callback)
@@ -189,23 +155,7 @@ suite.addBatch({
               topic: function(err, elem) {
                 browser.clickElement(elem, this.callback);
               },
-              "succeeds": function(err) { assert.isUndefined(err); },
-              "and waiting for transition": {
-                topic: function() {
-                  var self = this;
-                  waitFor(700, 10000, function(done) {
-                    browser.elementByCss('div.contents p:nth-child(2) strong', function(err, elem) {
-                      browser.text(elem, function(err, text) {
-                        done(!err && typeof text === 'string' && text.length > 0, err, text);
-                      });
-                    });
-                  }, this.callback);
-                },
-                "works": function(err, email) {
-                  assert.isNull(err);
-                  assert.equal(email, theEmail);
-                }
-              }
+              "succeeds": function(err) { assert.isUndefined(err); }
             }
           }
         }
@@ -217,38 +167,28 @@ suite.addBatch({
 suite.addBatch({
   "checking email": {
     topic: function() {
-      waitFor(1000, 10000, function(doneCB) {
-        request('http://restmail.net/mail/' + theEmail.split('@')[0], function (error, response, body) {
-          if (!error && response.statusCode == 200) {
-            var b = JSON.parse(body);
-            if (b.length > 0) doneCB(true, error, b[0]);
-            else doneCB(false);
-          } else {
-            doneCB(false);
-          }
-        })
-      }, this.callback);
+      restmail.getVerificationLink({ email: theEmail }, this.callback);
     },
-    "finds email": function(err, email) {
+    "finds email": function(err, link, email) {
       assert.isNull(err);
-      assert.ok(email.headers['x-browserid-verificationurl']);
+      assert.ok(link);
     },
     "and opening verification page": {
-      topic: function(err, email) {
+      topic: function(err, link, email) {
         var self = this;
         browser.close(function() {
           browser.windowHandles(function(err, data) {
             assert.ok(!err);
             assert.equal(data.length, 1);
             browser.window(data[0], function(err) {
-              browser.get(email.headers['x-browserid-verificationurl'], self.callback);
+              browser.get(link, self.callback);
             });
           });
         });
       },
       "causes redirect to 123done": {
         topic: function() {
-          waitFor(700, 20000, function(done) {
+          utils.waitFor(700, 20000, function(done) {
             browser.elementByCss('li#loggedin span', function(err, elem) {
               if (err) return done(false, err, elem);
               browser.text(elem, function(err, text) {
@@ -272,9 +212,7 @@ suite.addBatch({
     topic: function() {
       browser.quit(this.callback);
     },
-    "succeeds": function(err) {
-      assert.isUndefined(err);
-    }
+    "succeeds": function(err) { assert.isUndefined(err); }
   }
 });
 
