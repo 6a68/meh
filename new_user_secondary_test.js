@@ -12,7 +12,8 @@ assert = require('assert'),
 restmail = require('./lib/restmail.js'),
 utils = require('./lib/utils.js'),
 persona_urls = require('./lib/urls.js'),
-CSS = require('./lib/css.js');
+CSS = require('./lib/css.js'),
+dialog = require('./lib/dialog.js');
 
 // add fancy helper routines to wd
 require('./lib/wd-extensions.js');
@@ -50,7 +51,7 @@ const theEmail = restmail.randomEmail(10);
 suite.addBatch({
   "the sign in button becomes visible": {
     topic: function() {
-      browser.waitForDisplayed({ which: CSS["123done.org"].signinButton }, this.callback);
+      browser.waitForDisplayed(CSS["123done.org"].signinButton, this.callback);
     },
     "successfully": noError,
     "and clicking": {
@@ -69,68 +70,15 @@ suite.addBatch({
 });
 
 suite.addBatch({
-  "wait for input text box": {
+  "signing in as a new user": {
     topic: function() {
-      browser.elementByCss(CSS['dialog'].emailInput, this.callback);
+      dialog.signInAsNewUser({
+        browser: browser,
+        email: theEmail,
+        password: theEmail.split('@')[0], // we use the user part of email as password.  why not?
+      }, this.callback);
     },
-    "succeeds": noError,
-    "and typing an email address": {
-      topic: function(err, elem) {
-        browser.type(elem, theEmail, this.callback);
-      },
-      "succeeds": noError,
-      "and finding the next button": {
-        topic: function() {
-          browser.elementByCss(CSS['dialog'].newEmailNextButton, this.callback);
-        },
-        "succeeds": noError,
-        "and clicking it": {
-          topic: function(err, elem) {
-            browser.clickElement(elem, this.callback);
-          },
-          "succeeds": noError
-        }
-      }
-    }
-  }
-});
-
-suite.addBatch({
-  "finding password input": {
-    topic: function() {
-      browser.elementByCss(CSS['dialog'].choosePassword, this.callback);
-    },
-    "succeeds": noError,
-    "and typing password": {
-      topic: function(err, elem) {
-        browser.type(elem, theEmail.split('@')[0], this.callback);
-      },
-      "succeeds": noError,
-      "and finding the verify password input": {
-        topic: function() {
-          browser.elementByCss(CSS['dialog'].verifyPassword, this.callback);
-        },
-        "succeeds": noError,
-        "and retyping password": {
-          topic: function(err, elem) {
-            browser.type(elem, theEmail.split('@')[0], this.callback);
-          },
-          "succeeds": noError,
-          "and finding the next button": {
-            topic: function() {
-              browser.elementByCss(CSS['dialog'].createUserButton, this.callback);
-            },
-            "succeeds": noError,
-            "and clicking it": {
-              topic: function(err, elem) {
-                browser.clickElement(elem, this.callback);
-              },
-              "succeeds": noError
-            }
-          }
-        }
-      }
-    }
+    "succeeds": noError
   }
 });
 
