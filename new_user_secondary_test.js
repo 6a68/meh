@@ -11,7 +11,8 @@ wd = require('wd'),
 assert = require('assert'),
 restmail = require('./lib/restmail.js'),
 utils = require('./lib/utils.js'),
-persona_urls = require('./lib/urls.js');
+persona_urls = require('./lib/urls.js'),
+CSS = require('./lib/css.js');
 
 // add fancy helper routines to wd
 require('./lib/wd-extensions.js');
@@ -49,7 +50,7 @@ const theEmail = restmail.randomEmail(10);
 suite.addBatch({
   "the sign in button becomes visible": {
     topic: function() {
-      browser.waitForDisplayed({ which: 'li#loggedout button img' }, this.callback);
+      browser.waitForDisplayed({ which: CSS["123done.org"].signinButton }, this.callback);
     },
     "successfully": noError,
     "and clicking": {
@@ -59,7 +60,7 @@ suite.addBatch({
       "succeeds": noError,
       "and selecting the dialog window": {
         topic: function() {
-          browser.waitForWindow("__persona_dialog", this.callback);
+          browser.waitForWindow(CSS["persona.org"].windowName, this.callback);
         },
         "succeeds": noError
       }
@@ -70,7 +71,7 @@ suite.addBatch({
 suite.addBatch({
   "wait for input text box": {
     topic: function() {
-      browser.elementByCss('input#email', this.callback);
+      browser.elementByCss(CSS['dialog'].emailInput, this.callback);
     },
     "succeeds": noError,
     "and typing an email address": {
@@ -80,7 +81,7 @@ suite.addBatch({
       "succeeds": noError,
       "and finding the next button": {
         topic: function() {
-          browser.elementByCss('p.submit.buttonrow button.start', this.callback);
+          browser.elementByCss(CSS['dialog'].newEmailNextButton, this.callback);
         },
         "succeeds": noError,
         "and clicking it": {
@@ -97,7 +98,7 @@ suite.addBatch({
 suite.addBatch({
   "finding password input": {
     topic: function() {
-      browser.elementByCss('div#set_password input#password', this.callback);
+      browser.elementByCss(CSS['dialog'].choosePassword, this.callback);
     },
     "succeeds": noError,
     "and typing password": {
@@ -107,7 +108,7 @@ suite.addBatch({
       "succeeds": noError,
       "and finding the verify password input": {
         topic: function() {
-          browser.elementByCss('input#vpassword', this.callback);
+          browser.elementByCss(CSS['dialog'].verifyPassword, this.callback);
         },
         "succeeds": noError,
         "and retyping password": {
@@ -117,7 +118,7 @@ suite.addBatch({
           "succeeds": noError,
           "and finding the next button": {
             topic: function() {
-              browser.elementByCss('button#verify_user', this.callback);
+              browser.elementByCss(CSS['dialog'].createUserButton, this.callback);
             },
             "succeeds": noError,
             "and clicking it": {
@@ -152,7 +153,7 @@ suite.addBatch({
       "causes redirect to 123done": {
         topic: function() {
           utils.waitFor(700, 20000, function(done) {
-            browser.elementByCss('li#loggedin span', function(err, elem) {
+            browser.elementByCss(CSS['123done.org'].currentlyLoggedInEmail, function(err, elem) {
               if (err) return done(false, err, elem);
               browser.text(elem, function(err, text) {
                 done(!err && typeof text === 'string' && text.length, err, text);
