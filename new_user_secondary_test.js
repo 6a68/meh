@@ -13,18 +13,23 @@ restmail = require('./lib/restmail.js'),
 utils = require('./lib/utils.js'),
 persona_urls = require('./lib/urls.js');
 
+// add fancy helper routines to wd
+require('./lib/wd-extensions.js');
+
 // setup
 var suite = vows.describe(path.relative("..", __dirname));
 suite.options.error = false;
 
 var browser = wd.remote();
 
-function noError(err) { assert.ok(!!err); }
+function noError(err) {
+  assert.ok(!err, err);
+}
 
 suite.addBatch({
   "starting a session": {
     topic: function() {
-      utils.newSession(browser, this.callback);
+      browser.newSession(this.callback);
     },
     "succeeds": noError
   }
@@ -42,43 +47,28 @@ suite.addBatch({
 const theEmail = restmail.randomEmail(10);
 
 suite.addBatch({
-  "finding button": {
+  "the sign in button becomes visible": {
     topic: function() {
-      browser.elementByCss('li#loggedout button img', this.callback);
+      browser.waitForDisplayed({ which: 'li#loggedout button img' }, this.callback);
     },
-    "visibility": {
+    "successfully": noError,
+    "and clicking": {
       topic: function(err, element) {
-        var self = this;
-        utils.waitFor(100, 3000, function(done) {
-          browser.displayed(element, function(err, displayed) {
-            done(!err && displayed, err, displayed);
-          });
-        }, function (err, displayed) {
-          self.callback(err, element, displayed);
-        });
+        browser.clickElement(element, this.callback);
       },
-      "occurs": function(err, element, displayed) {
-        assert.isNull(err);
-        assert.isTrue(displayed);
-      },
-      "and clicking": {
-        topic: function(err, element) {
-          browser.clickElement(element, this.callback);
+      "succeeds": noError,
+      "and selecting the dialog window": {
+        topic: function() {
+          browser.window("__persona_dialog", this.callback);
         },
         "succeeds": noError,
-        "and selecting the dialog window": {
+        "and the title": {
           topic: function() {
-            browser.window("__persona_dialog", this.callback);
+            browser.title(this.callback)
           },
-          "succeeds": noError,
-          "and the title": {
-            topic: function() {
-              browser.title(this.callback)
-            },
-            "is from the dialog": function(err, title) {
-              assert.isNull(err);
-              assert.equal(title, 'Mozilla Persona: A Better Way to Sign In');
-            }
+          "is from the dialog": function(err, title) {
+            assert.isNull(err);
+            assert.equal(title, 'Mozilla Persona: A Better Way to Sign In');
           }
         }
       }
