@@ -35,9 +35,7 @@ suite.addBatch({
     topic: function() {
       browser.get(persona_urls["123done"], this.callback);
     },
-    "succeeds": function(err, foo) {
-      assert.isUndefined(err);
-    }
+    "succeeds": noError
   }
 });
 
@@ -67,12 +65,12 @@ suite.addBatch({
         topic: function(err, element) {
           browser.clickElement(element, this.callback);
         },
-        "succeeds": function(err) { assert.isUndefined(err); },
+        "succeeds": noError,
         "and selecting the dialog window": {
           topic: function() {
             browser.window("__persona_dialog", this.callback);
           },
-          "succeeds": function(err) { assert.isUndefined(err); },
+          "succeeds": noError,
           "and the title": {
             topic: function() {
               browser.title(this.callback)
@@ -93,24 +91,22 @@ suite.addBatch({
     topic: function() {
       browser.elementByCss('input#email', this.callback);
     },
-    "succeeds": function(err) {
-      assert.isNull(err);
-    },
+    "succeeds": noError,
     "and typing an email address": {
       topic: function(err, elem) {
         browser.type(elem, theEmail, this.callback);
       },
-      "succeeds": function(err, elem) { assert.isUndefined(err); },
+      "succeeds": noError,
       "and finding the next button": {
         topic: function() {
           browser.elementByCss('p.submit.buttonrow button.start', this.callback);
         },
-        "succeeds": function(err) { assert.isNull(err); },
+        "succeeds": noError,
         "and clicking it": {
           topic: function(err, elem) {
             browser.clickElement(elem, this.callback);
           },
-          "succeeds": function(err) { assert.isUndefined(err); }
+          "succeeds": noError
         }
       }
     }
@@ -122,32 +118,32 @@ suite.addBatch({
     topic: function() {
       browser.elementByCss('div#set_password input#password', this.callback);
     },
-    "succeeds": function(err) { assert.isNull(err); },
+    "succeeds": noError,
     "and typing password": {
       topic: function(err, elem) {
         browser.type(elem, theEmail.split('@')[0], this.callback);
       },
-      "succeeds": function(err) { assert.isUndefined(err); },
+      "succeeds": noError,
       "and finding the verify password input": {
         topic: function() {
           browser.elementByCss('input#vpassword', this.callback);
         },
-        "succeeds": function(err) { assert.isNull(err); },
+        "succeeds": noError,
         "and retyping password": {
           topic: function(err, elem) {
             browser.type(elem, theEmail.split('@')[0], this.callback);
           },
-          "succeeds": function(err) { assert.isUndefined(err); },
+          "succeeds": noError,
           "and finding the next button": {
             topic: function() {
               browser.elementByCss('button#verify_user', this.callback);
             },
-            "succeeds": function(err) { assert.isNull(err); },
+            "succeeds": noError,
             "and clicking it": {
               topic: function(err, elem) {
                 browser.clickElement(elem, this.callback);
               },
-              "succeeds": function(err) { assert.isUndefined(err); }
+              "succeeds": noError
             }
           }
         }
@@ -204,7 +200,7 @@ suite.addBatch({
     topic: function() {
       browser.quit(this.callback);
     },
-    "succeeds": function(err) { assert.isUndefined(err); }
+    "succeeds": noError
   }
 });
 
