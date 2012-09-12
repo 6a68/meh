@@ -152,14 +152,7 @@ suite.addBatch({
       },
       "causes redirect to 123done": {
         topic: function() {
-          utils.waitFor(700, 20000, function(done) {
-            browser.elementByCss(CSS['123done.org'].currentlyLoggedInEmail, function(err, elem) {
-              if (err) return done(false, err, elem);
-              browser.text(elem, function(err, text) {
-                done(!err && typeof text === 'string' && text.length, err, text);
-              });
-            });
-          }, this.callback);
+          browser.waitForElementText(CSS['123done.org'].currentlyLoggedInEmail, this.callback);
         },
         "and proper email address is logged in": function(err, text) {
           assert.isNull(err);
