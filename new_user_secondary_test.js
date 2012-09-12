@@ -59,18 +59,9 @@ suite.addBatch({
       "succeeds": noError,
       "and selecting the dialog window": {
         topic: function() {
-          browser.window("__persona_dialog", this.callback);
+          browser.waitForWindow("__persona_dialog", this.callback);
         },
-        "succeeds": noError,
-        "and the title": {
-          topic: function() {
-            browser.title(this.callback)
-          },
-          "is from the dialog": function(err, title) {
-            assert.isNull(err);
-            assert.equal(title, 'Mozilla Persona: A Better Way to Sign In');
-          }
-        }
+        "succeeds": noError
       }
     }
   }
@@ -154,14 +145,8 @@ suite.addBatch({
     "and opening verification page": {
       topic: function(err, link, email) {
         var self = this;
-        browser.close(function() {
-          browser.windowHandles(function(err, data) {
-            assert.ok(!err);
-            assert.equal(data.length, 1);
-            browser.window(data[0], function(err) {
-              browser.get(link, self.callback);
-            });
-          });
+        browser.closeCurrentBrowserWindow(function() {
+          browser.get(link, self.callback);
         });
       },
       "causes redirect to 123done": {
