@@ -60,4 +60,4 @@ vowsHarness({
   "shut down": function(done) {
     browser.quit(done);
   }
-});
+}, module);
