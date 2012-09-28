@@ -37,6 +37,7 @@ var useropts = {
 
 // literally cutting and pasting from the other test for right now
 // this is really verbose
+/*
 vowsHarness({
   "create a new selenium session": function(done) {
     browser.newSession(done);
@@ -52,7 +53,7 @@ vowsHarness({
   "switch to the dialog when it opens": function(done) {
     browser.waitForWindow(CSS["persona.org"].windowName, done);
   },
-  /* not cut n pasted :) */
+  // not cut n pasted :)
   "sign in with the usual fake account": function(done) {
     browser.chain()
       .elementByCss(CSS['dialog'].emailInput, function(err, el) {
@@ -87,4 +88,65 @@ vowsHarness({
     browser.quit(done);
   }
 }, module);
+*/
 
+// add this to the webdriver prototype
+function clickWhenDisplayed(selector, cb, errb) {
+  browser.chain()
+    .waitForDisplayed(selector)
+    .elementByCss(selector, function(err, el) {
+      browser.click(el, errb);
+    });
+  cb()
+}
+
+vowsHarness({
+  "create a new selenium session": function(done) {
+    browser.newSession(done);
+  },
+  "load myfavoritebeer and wait for the signin button to be visible": function(done) {
+    browser.chain()
+      .get(persona_urls['myfavoritebeer'])
+      .waitForDisplayed(CSS['myfavoritebeer.org'].signinButton)
+      .elementByCss(CSS['myfavoritebeer.org'].signinButton, function (err, el) {
+        browser.clickElement(el, done);
+      })
+  },
+  "switch to the dialog when it opens": function(done) {
+    browser.waitForWindow(CSS["persona.org"].windowName, done);
+  },
+  "sign in with the usual fake account": function(done) {
+    browser.chain()
+      .elementByCss(CSS['dialog'].emailInput, function(err, el) {
+        errCheck(err);
+        browser.type(el, useropts.username, noop);
+      })
+      .elementByCss('button.start', function(err, el) {
+        errCheck(err);
+        browser.clickElement(el, noop);
+      })
+      .elementByCss(CSS['dialog'].existingPassword, function(err, el) {
+        errCheck(err);
+        browser.type(el, useropts.password, noop);
+      })
+      .waitForDisplayed(CSS['dialog'].returningUserButton)
+      .elementByCss(CSS['dialog'].returningUserButton, function(err, el) {
+        errCheck(err);
+        browser.clickElement(el, done);
+      })
+  },
+  "verify signed in to myfavoritebeer": function(done) {
+    browser.windowHandles(function(err, handles) {
+      console.log('windowhandles length is ' + handles.length)
+      browser.window(handles[0], function(err) {
+        browser.waitForElementText(CSS['myfavoritebeer.org'].currentlyLoggedInEmail, function(err, text) {
+          assert.equal(text, useropts.username);
+          done()
+        });
+      });
+    });
+  },
+  "tear down browser": function(done) {
+    browser.quit(done);
+  }
+}, module);
