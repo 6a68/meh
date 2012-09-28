@@ -23,21 +23,20 @@ var browser = wd.remote();
 // ugh lack of control flow is fucking maddening
 function noop() {}
 
-  function errCheck(err) {
-    if (err) {
-      cb(err);
-      throw ("error: " + err);
-    }
+function errCheck(err) {
+  if (err) {
+    cb(err);
+    throw ("error: " + err);
   }
+}
 
 var useropts = {
   password: process.env['PERSONA_PASSWORD'],
   username: process.env['PERSONA_USERNAME']
-}
+};
 
 // literally cutting and pasting from the other test for right now
 // this is really verbose
-/*
 vowsHarness({
   "create a new selenium session": function(done) {
     browser.newSession(done);
@@ -53,26 +52,12 @@ vowsHarness({
   "switch to the dialog when it opens": function(done) {
     browser.waitForWindow(CSS["persona.org"].windowName, done);
   },
-  // not cut n pasted :)
   "sign in with the usual fake account": function(done) {
-    browser.chain()
-      .elementByCss(CSS['dialog'].emailInput, function(err, el) {
-        errCheck(err);
-        browser.type(el, useropts.username, noop);
-      })
-      .elementByCss('button.start', function(err, el) {
-        errCheck(err);
-        browser.clickElement(el, noop);
-      })
-      .elementByCss(CSS['dialog'].existingPassword, function(err, el) {
-        errCheck(err);
-        browser.type(el, useropts.password, noop);
-      })
-      .waitForDisplayed(CSS['dialog'].returningUserButton)
-      .elementByCss(CSS['dialog'].returningUserButton, function(err, el) {
-        errCheck(err);
-        browser.clickElement(el, done);
-      })
+    dialog.signInExistingUser({
+      browser: browser,
+      email: useropts.username,
+      password: useropts.password
+    }, done);
   },
   "verify signed in to 123done": function(done) {
     browser.windowHandles(function(err, handles) {
@@ -88,7 +73,6 @@ vowsHarness({
     browser.quit(done);
   }
 }, module);
-*/
 
 // add this to the webdriver prototype
 function clickWhenDisplayed(selector, cb, errb) {
@@ -116,24 +100,11 @@ vowsHarness({
     browser.waitForWindow(CSS["persona.org"].windowName, done);
   },
   "sign in with the usual fake account": function(done) {
-    browser.chain()
-      .elementByCss(CSS['dialog'].emailInput, function(err, el) {
-        errCheck(err);
-        browser.type(el, useropts.username, noop);
-      })
-      .elementByCss('button.start', function(err, el) {
-        errCheck(err);
-        browser.clickElement(el, noop);
-      })
-      .elementByCss(CSS['dialog'].existingPassword, function(err, el) {
-        errCheck(err);
-        browser.type(el, useropts.password, noop);
-      })
-      .waitForDisplayed(CSS['dialog'].returningUserButton)
-      .elementByCss(CSS['dialog'].returningUserButton, function(err, el) {
-        errCheck(err);
-        browser.clickElement(el, done);
-      })
+    dialog.signInExistingUser({
+      browser: browser,
+      email: useropts.username,
+      password: useropts.password
+    }, done);
   },
   "verify signed in to myfavoritebeer": function(done) {
     browser.windowHandles(function(err, handles) {
