@@ -71,21 +71,13 @@ vowsHarness({
   },
   "tear down browser": function(done) {
     browser.quit(done);
-  }
-}, module);
+  },
 
-// add this to the webdriver prototype
-function clickWhenDisplayed(selector, cb, errb) {
-  browser.chain()
-    .waitForDisplayed(selector)
-    .elementByCss(selector, function(err, el) {
-      browser.click(el, errb);
-    });
-  cb()
-}
 
-vowsHarness({
-  "create a new selenium session": function(done) {
+  // tricky: you can't have duplicate function names or weird things happen
+
+
+  "create another selenium session": function(done) {
     browser.newSession(done);
   },
   "load myfavoritebeer and wait for the signin button to be visible": function(done) {
@@ -96,10 +88,10 @@ vowsHarness({
         browser.clickElement(el, done);
       })
   },
-  "switch to the dialog when it opens": function(done) {
+  "mfb switch to the dialog when it opens": function(done) {
     browser.waitForWindow(CSS["persona.org"].windowName, done);
   },
-  "sign in with the usual fake account": function(done) {
+  "mfb sign in with the usual fake account": function(done) {
     dialog.signInExistingUser({
       browser: browser,
       email: useropts.username,
@@ -117,7 +109,7 @@ vowsHarness({
       });
     });
   },
-  "tear down browser": function(done) {
+  "mfb tear down browser": function(done) {
     browser.quit(done);
   }
 }, module);
