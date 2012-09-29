@@ -69,46 +69,5 @@ vowsHarness({
   },
   "shut down": function(done) {
     browser.quit(done);
-  },
-
-
-  "startup again, load 123done, click sign in": function(done) {
-    startup(done)
-  },
-  "sign in a new eyedeemee user": function(done) {
-    function noop() {}
-    browser.chain()
-      .waitForWindow(CSS['persona.org'].windowName)
-      .elementByCss(CSS['dialog'].emailInput, function(err, elem) {
-        browser.type(elem, eyedeemail, noop);
-      })
-      .elementByCss(CSS['dialog'].newEmailNextButton, function(err, elem) {
-        browser.clickElement(elem, noop);
-      })
-      // TODO regular wait doesn't seem to be working.
-      // need to ensure there's no spinner inside the button, maybe?
-      .waitForDisplayed(CSS['dialog'].verifyWithPrimaryButton)
-      .elementByCss(CSS['dialog'].verifyWithPrimaryButton, function(err, elem) {
-        browser.clickElement(elem, noop);
-      })
-      .waitForDisplayed(CSS['eyedee.me'].newPassword)
-      .elementByCss(CSS['eyedee.me'].newPassword, function(err, elem) {
-        browser.type(elem, eyedeemail.split('@')[0], noop);
-      })
-      .elementByCss(CSS['eyedee.me'].createAccountButton, function(err, elem) {
-        browser.clickElement(elem, done);
-      })
-    },
-    // TODO 123done never seems to log in. something up with beta server?
-    "switch back to main window and verify we're logged in": function(done) {
-      // this part copied from one of the sign in tests :-P
-      browser.windowHandles(function(err, handles) {
-        browser.window(handles[0], function(err) {
-          browser.waitForElementText(CSS['123done.org'].currentlyLoggedInEmail, function(err, text) {
-            assert.equal(text, eyedeemail);
-            done()
-          });
-        });
-      });
-    }
+  }
 }, module);
