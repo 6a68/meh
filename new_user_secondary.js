@@ -12,46 +12,62 @@ restmail = require('./lib/restmail.js'),
 utils = require('./lib/utils.js'),
 persona_urls = require('./lib/urls.js'),
 CSS = require('./lib/css.js'),
-dialog = require('./lib/dialog.js');
+dialog = require('./lib/dialog.js'),
+vowsHarness = require('./lib/vows_harness.js');
 
 // add fancy helper routines to wd
 require('./lib/wd-extensions.js');
 
 // generate a randome email we'll use
 const theEmail = restmail.randomEmail(10);
-
 var browser = wd.remote();
+var eyedeemail = restmail.randomEmail(10, 'eyedee.me');
+function startup(cb) {
+  browser.chain()
+    .newSession()
+    .get(persona_urls["123done"])
+    .waitForDisplayed(CSS["123done.org"].signinButton, function(err, el) {
+      browser.clickElement(el, cb)
+    })
+}
 
-browser.newSession(function(err) {
-  assert(!err);
-  browser.get(persona_urls["123done"], function() {});
-  browser.waitForDisplayed(CSS["123done.org"].signinButton, function (err, el) {
-    assert(!err);
-    browser.clickElement(el, function(err) {
-      assert(!err);
-      browser.waitForWindow(CSS["persona.org"].windowName, function(err) {
-        assert(!err);
-        dialog.signInAsNewUser({
-          browser: browser,
-          email: theEmail,
-          password: theEmail.split('@')[0], // we use the user part of email as password.  why not?
-        }, function(err) {
-          assert(!err);
-          restmail.getVerificationLink({ email: theEmail }, function(err, link) {
-            assert(!err);
-            browser.closeCurrentBrowserWindow(function() {
-              browser.get(link, function(err) { assert(!err, err); });
-              browser.waitForElementText(CSS['123done.org'].currentlyLoggedInEmail, function(err, text) {
-                assert(!err);
-                assert.equal(text, theEmail);
-                browser.quit(function() {
-                  console.log("success!");
-                });
-              });
-            });
-          });
-        });
-      });
+vowsHarness({
+
+  "create a new selenium session": function(done) {
+    browser.newSession(done);
+  },
+  "load 123done and wait for the signin button to be visible": function(done) {
+    browser.get(persona_urls["123done"], function() {});
+    browser.waitForDisplayed(CSS["123done.org"].signinButton, done);
+  },
+  "click the signin button": function(done, el) {
+    browser.clickElement(el, done);
+  },
+  "switch to the dialog when it opens": function(done) {
+    browser.waitForWindow(CSS["persona.org"].windowName, done);
+  },
+  "sign in a new @restmail (secondary) user": function(done) {
+    dialog.signInAsNewUser({
+      browser: browser,
+      email: theEmail,
+      password: theEmail.split('@')[0], // we use the user part of email as password.  why not?
+    }, done);
+  },
+  "get verification link from email": function(done) {
+    restmail.getVerificationLink({ email: theEmail }, done);
+  },
+  "open verification link": function(done, link) {
+    browser.closeCurrentBrowserWindow(function() {
+      browser.get(link, done);
     });
-  });
-});
+  },
+  "verify we're logged in as the expected user": function(done) {
+    browser.waitForElementText(CSS['123done.org'].currentlyLoggedInEmail, function(err, text) {
+      assert.equal(text, theEmail);
+      done()
+    });
+  },
+  "shut down": function(done) {
+    browser.quit(done);
+  }
+}, module);
