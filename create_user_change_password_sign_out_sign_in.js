@@ -133,15 +133,13 @@ vowsHarness({
         browser.clickElement(el, done)
       })
   },
-    // what's weird is that sauce doesn't show that you're
-    // logged in when you return.
-    // so maybe we should fire up a totally new browser
-    // and do the login step instead.
-
   "back to 123done": function(done) {
     // copied from top of this test, refactor TODO
+    browser.get(persona_urls["123done"], done);
+  },
+  "clear all the cookies and reload": function(done) {
     browser.chain()
-      .newSession()
+      .deleteAllCookies()
       .get(persona_urls["123done"], done);
   },
   "wait for login link to reappear": function(done) {
