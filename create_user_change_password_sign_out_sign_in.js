@@ -25,7 +25,7 @@ const theEmail = restmail.randomEmail(10);
 var sauceUser = process.env['SAUCE_USER'];
 var sauceKey = process.env['SAUCE_APIKEY'];
 if (sauceUser && sauceKey) {
-  console.log('using remote sauce browser')
+  console.error('using remote sauce browser')
   var browser = wd.remote('ondemand.saucelabs.com', 80, sauceUser, sauceKey);
   browser.on('status', function(info){
     // using console.error so we don't mix up plain text with junitxml
