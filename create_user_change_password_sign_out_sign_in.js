@@ -28,7 +28,8 @@ if (sauceUser && sauceKey) {
   console.log('using remote sauce browser')
   var browser = wd.remote('ondemand.saucelabs.com', 80, sauceUser, sauceKey);
   browser.on('status', function(info){
-    console.log('\x1b[36m%s\x1b[0m', info);
+    // using console.error so we don't mix up plain text with junitxml
+    console.error('\x1b[36m%s\x1b[0m', info);
   });
 
   /*
