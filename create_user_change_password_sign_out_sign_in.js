@@ -20,7 +20,27 @@ require('./lib/wd-extensions.js');
 
 // generate a randome email we'll use
 const theEmail = restmail.randomEmail(10);
-var browser = wd.remote();
+
+// TODO extract to setup function
+var sauceUser = process.env['SAUCE_USER'];
+var sauceKey = process.env['SAUCE_APIKEY'];
+if (sauceUser && sauceKey) {
+  console.log('using remote sauce browser')
+  var browser = wd.remote('ondemand.saucelabs.com', 80, sauceUser, sauceKey);
+  browser.on('status', function(info){
+    console.log('\x1b[36m%s\x1b[0m', info);
+  });
+
+  /*
+  browser.on('command', function(meth, path){
+    console.log(' > \x1b[33m%s\x1b[0m: %s', meth, path);
+  });
+  */
+} else { 
+  console.log('using local browser');
+  var browser = wd.remote()
+}
+
 var eyedeemail = restmail.randomEmail(10, 'eyedee.me');
 // argh! put this in a util!
 function noop() {}
@@ -102,7 +122,8 @@ vowsHarness({
   },
   "enter old and new passwords and click done": function(done) {
     browser.chain()
-      .waitForDisplayed(CSS['persona.org'].oldPassword, function(err, el) {
+      .waitForDisplayed(CSS['persona.org'].oldPassword)
+      .elementByCss(CSS['persona.org'].oldPassword, function(err, el) {
         browser.type(el, theEmail.split('@')[0], noop)
       })
       .elementByCss(CSS['persona.org'].newPassword, function(err, el) {
@@ -110,15 +131,18 @@ vowsHarness({
       })
       .waitForDisplayed(CSS['persona.org'].passwordChangeDoneButton, function(err, el) {
         browser.clickElement(el, done)
-      });
+      })
   },
+    // what's weird is that sauce doesn't show that you're
+    // logged in when you return.
+    // so maybe we should fire up a totally new browser
+    // and do the login step instead.
+
   "back to 123done": function(done) {
     // copied from top of this test, refactor TODO
-    browser.get(persona_urls["123done"], function() {});
-    browser.waitForDisplayed(CSS["123done.org"].logoutLink, done);
-  },
-  "click 123done logout link": function(done, el) {
-    browser.clickElement(el, done)
+    browser.chain()
+      .newSession()
+      .get(persona_urls["123done"], done);
   },
   "wait for login link to reappear": function(done) {
     browser.waitForDisplayed(CSS["123done.org"].signinButton, done);
