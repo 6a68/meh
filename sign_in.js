@@ -42,15 +42,13 @@ vowsHarness({
     browser.newSession(done);
   },
   "load 123done and wait for the signin button to be visible": function(done) {
-    browser.get(persona_urls["123done"], noop);
-    browser.waitForDisplayed(CSS["123done.org"].signinButton, done);
-    // grab a pointer to the top window
+    browser.get(persona_urls["123done"], done);
   },
   "click the signin button": function(done, el) {
-    browser.clickElement(el, done);
+    browser.wclick(CSS['123done.org'].signinButton, done);
   },
   "switch to the dialog when it opens": function(done) {
-    browser.waitForWindow(CSS["persona.org"].windowName, done);
+    browser.wwin(CSS["persona.org"].windowName, done);
   },
   "sign in with the usual fake account": function(done) {
     dialog.signInExistingUser({
@@ -60,19 +58,16 @@ vowsHarness({
     }, done);
   },
   "verify signed in to 123done": function(done) {
-    browser.windowHandles(function(err, handles) {
-      browser.window(handles[0], function(err) {
-        browser.waitForElementText(CSS['123done.org'].currentlyLoggedInEmail, function(err, text) {
-          assert.equal(text, useropts.username);
-          done()
-        });
-      });
-    });
+    browser.chain()
+      .wwin()
+      .wtext(CSS['123done.org'].currentlyLoggedInEmail, function(err, text) {
+        assert.equal(text, useropts.username);
+        done()
+       });
   },
   "tear down browser": function(done) {
     browser.quit(done);
   },
-
 
   // tricky: you can't have duplicate function names or weird things happen
 
@@ -83,13 +78,10 @@ vowsHarness({
   "load myfavoritebeer and wait for the signin button to be visible": function(done) {
     browser.chain()
       .get(persona_urls['myfavoritebeer'])
-      .waitForDisplayed(CSS['myfavoritebeer.org'].signinButton)
-      .elementByCss(CSS['myfavoritebeer.org'].signinButton, function (err, el) {
-        browser.clickElement(el, done);
-      })
+      .wclick(CSS['myfavoritebeer.org'].signinButton, done);
   },
   "mfb switch to the dialog when it opens": function(done) {
-    browser.waitForWindow(CSS["persona.org"].windowName, done);
+    browser.wwin(CSS["persona.org"].windowName, done);
   },
   "mfb sign in with the usual fake account": function(done) {
     dialog.signInExistingUser({
@@ -99,15 +91,12 @@ vowsHarness({
     }, done);
   },
   "verify signed in to myfavoritebeer": function(done) {
-    browser.windowHandles(function(err, handles) {
-      console.log('windowhandles length is ' + handles.length)
-      browser.window(handles[0], function(err) {
-        browser.waitForElementText(CSS['myfavoritebeer.org'].currentlyLoggedInEmail, function(err, text) {
-          assert.equal(text, useropts.username);
-          done()
-        });
+    browser.chain()
+      .wwin()
+      .wtext(CSS['myfavoritebeer.org'].currentlyLoggedInEmail, function(err, text) {
+        assert.equal(text, useropts.username);
+        done()
       });
-    });
   },
   "mfb tear down browser": function(done) {
     browser.quit(done);
