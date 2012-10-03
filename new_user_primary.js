@@ -18,57 +18,32 @@ vowsHarness = require('./lib/vows_harness.js');
 // add fancy helper routines to wd
 require('./lib/wd-extensions.js');
 
-// generate a randome email we'll use
-const theEmail = restmail.randomEmail(10);
 var browser = wd.remote();
 var eyedeemail = restmail.randomEmail(10, 'eyedee.me');
-function startup(cb) {
-  browser.chain()
-    .newSession()
-    .get(persona_urls["123done"])
-    .waitForDisplayed(CSS["123done.org"].signinButton, function(err, el) {
-      browser.clickElement(el, cb)
-    })
-}
 
 vowsHarness({
   "startup, load 123done, click sign in": function(done) {
-    startup(done)
+    browser.chain()
+      .newSession()
+      .get(persona_urls["123done"])
+      .wclick(CSS["123done.org"].signinButton, done);
   },
   "sign in a new eyedeemee user": function(done) {
-    function noop() {}
     browser.chain()
-      .waitForWindow(CSS['persona.org'].windowName)
-      .elementByCss(CSS['dialog'].emailInput, function(err, elem) {
-        browser.type(elem, eyedeemail, noop);
-      })
-      .elementByCss(CSS['dialog'].newEmailNextButton, function(err, elem) {
-        browser.clickElement(elem, noop);
-      })
-      // TODO regular wait doesn't seem to be working.
-      // need to ensure there's no spinner inside the button, maybe?
-      .waitForDisplayed(CSS['dialog'].verifyWithPrimaryButton)
-      .elementByCss(CSS['dialog'].verifyWithPrimaryButton, function(err, elem) {
-        browser.clickElement(elem, noop);
-      })
-      .waitForDisplayed(CSS['eyedee.me'].newPassword)
-      .elementByCss(CSS['eyedee.me'].newPassword, function(err, elem) {
-        browser.type(elem, eyedeemail.split('@')[0], noop);
-      })
-      .elementByCss(CSS['eyedee.me'].createAccountButton, function(err, elem) {
-        browser.clickElement(elem, done);
-      })
-    },
-    // TODO 123done never seems to log in. something up with beta server?
-    "switch back to main window and verify we're logged in": function(done) {
-      // this part copied from one of the sign in tests :-P
-      browser.windowHandles(function(err, handles) {
-        browser.window(handles[0], function(err) {
-          browser.waitForElementText(CSS['123done.org'].currentlyLoggedInEmail, function(err, text) {
-            assert.equal(text, eyedeemail);
-            done()
-          });
-        });
+      .wwin(CSS['persona.org'].windowName)
+      .wtype(CSS['dialog'].emailInput, eyedeemail)
+      .wclick(CSS['dialog'].newEmailNextButton)
+      .wclick(CSS['dialog'].verifyWithPrimaryButton)
+      .wtype(CSS['eyedee.me'].newPassword, eyedeemail.split('@')[0])
+      .wclick(CSS['eyedee.me'].createAccountButton, done);
+  },
+  // TODO 123done never seems to log in. something up with beta server?
+  "switch back to main window and verify we're logged in": function(done) {
+    browser.chain()
+      .wwin()
+      .wtext(CSS['123done.org'].currentlyLoggedInEmail, function(err, text) {
+        assert.equal(text, eyedeemail);
+        done()
       });
-    }
+  }
 }, module);
