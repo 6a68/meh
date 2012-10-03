@@ -13,21 +13,26 @@ utils = require('../lib/utils.js'),
 persona_urls = require('../lib/urls.js'),
 CSS = require('../lib/css.js'),
 dialog = require('../lib/dialog.js'),
-vowsHarness = require('../lib/vows_harness.js');
+vowsHarness = require('../lib/vows_harness.js'),
+personatestuser = require('../lib/personatestuser.js');
 
 // add fancy helper routines to wd
 require('../lib/wd-extensions.js');
 
 var browser = wd.remote();
 
-var useropts = {
-  password: process.env['PERSONA_PASSWORD'],
-  username: process.env['PERSONA_USERNAME']
-};
+var testUser;
 
 vowsHarness({
   "create a new selenium session": function(done) {
     browser.newSession(done);
+  },
+  "create a new personatestuser": function(done) {
+    personatestuser.getVerifiedUser({ env: process.env['PERSONA_ENV'] || 'dev' }, function(err, user, blob) { 
+      if (err) { throw new Error('error getting persona test user: ' + err) }
+      testUser = user;
+      done()
+    })
   },
   "load 123done and wait for the signin button to be visible": function(done) {
     browser.get(persona_urls["123done"], done);
@@ -41,15 +46,15 @@ vowsHarness({
   "sign in with the usual fake account": function(done) {
     dialog.signInExistingUser({
       browser: browser,
-      email: useropts.username,
-      password: useropts.password
+      email: testUser.email,
+      password: testUser.pass
     }, done);
   },
   "verify signed in to 123done": function(done) {
     browser.chain()
       .wwin()
       .wtext(CSS['123done.org'].currentlyLoggedInEmail, function(err, text) {
-        assert.equal(text, useropts.username);
+        assert.equal(text, testUser.email);
         done()
        });
   },
@@ -59,9 +64,16 @@ vowsHarness({
 
   // tricky: you can't have duplicate keys or weird things happen
 
-  // todo extract duplication
+  // todo extract duplication!
   "create another selenium session": function(done) {
     browser.newSession(done);
+  },
+  "create another new personatestuser": function(done) {
+    personatestuser.getVerifiedUser({ env: process.env['PERSONA_ENV'] || 'dev' }, function(err, user, blob) { 
+      if (err) { throw new Error('error getting persona test user: ' + err) }
+      testUser = user;
+      done()
+    })
   },
   "load myfavoritebeer and wait for the signin button to be visible": function(done) {
     browser.chain()
@@ -74,15 +86,15 @@ vowsHarness({
   "mfb sign in with the usual fake account": function(done) {
     dialog.signInExistingUser({
       browser: browser,
-      email: useropts.username,
-      password: useropts.password
+      email: testUser.email,
+      password: testUser.pass
     }, done);
   },
   "verify signed in to myfavoritebeer": function(done) {
     browser.chain()
       .wwin()
       .wtext(CSS['myfavoritebeer.org'].currentlyLoggedInEmail, function(err, text) {
-        assert.equal(text, useropts.username);
+        assert.equal(text, testUser.email);
         done()
       });
   },
