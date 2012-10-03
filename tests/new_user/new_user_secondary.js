@@ -8,43 +8,31 @@ const
 path = require('path'),
 wd = require('wd'),
 assert = require('assert'),
-restmail = require('./lib/restmail.js'),
-utils = require('./lib/utils.js'),
-persona_urls = require('./lib/urls.js'),
-CSS = require('./lib/css.js'),
-dialog = require('./lib/dialog.js'),
-vowsHarness = require('./lib/vows_harness.js');
+restmail = require('../../lib/restmail.js'),
+utils = require('../../lib/utils.js'),
+persona_urls = require('../../lib/urls.js'),
+CSS = require('../../lib/css.js'),
+dialog = require('../../lib/dialog.js'),
+vowsHarness = require('../../lib/vows_harness.js');
 
 // add fancy helper routines to wd
-require('./lib/wd-extensions.js');
+require('../../lib/wd-extensions.js');
 
 // generate a randome email we'll use
 const theEmail = restmail.randomEmail(10);
 var browser = wd.remote();
-var eyedeemail = restmail.randomEmail(10, 'eyedee.me');
-function startup(cb) {
-  browser.chain()
-    .newSession()
-    .get(persona_urls["123done"])
-    .waitForDisplayed(CSS["123done.org"].signinButton, function(err, el) {
-      browser.clickElement(el, cb)
-    })
-}
 
 vowsHarness({
-
   "create a new selenium session": function(done) {
     browser.newSession(done);
   },
-  "load 123done and wait for the signin button to be visible": function(done) {
-    browser.get(persona_urls["123done"], function() {});
-    browser.waitForDisplayed(CSS["123done.org"].signinButton, done);
-  },
-  "click the signin button": function(done, el) {
-    browser.clickElement(el, done);
+  "load 123done and click the signin button": function(done) {
+    browser.chain()
+      .get(persona_urls["123done"])
+      .wclick(CSS["123done.org"].signinButton, done);
   },
   "switch to the dialog when it opens": function(done) {
-    browser.waitForWindow(CSS["persona.org"].windowName, done);
+    browser.wwin(CSS["persona.org"].windowName, done);
   },
   "sign in a new @restmail (secondary) user": function(done) {
     dialog.signInAsNewUser({
@@ -62,7 +50,7 @@ vowsHarness({
     });
   },
   "verify we're logged in as the expected user": function(done) {
-    browser.waitForElementText(CSS['123done.org'].currentlyLoggedInEmail, function(err, text) {
+    browser.wtext(CSS['123done.org'].currentlyLoggedInEmail, function(err, text) {
       assert.equal(text, theEmail);
       done()
     });

@@ -8,15 +8,15 @@ const
 path = require('path'),
 wd = require('wd'),
 assert = require('assert'),
-restmail = require('./lib/restmail.js'),
-utils = require('./lib/utils.js'),
-persona_urls = require('./lib/urls.js'),
-CSS = require('./lib/css.js'),
-dialog = require('./lib/dialog.js'),
-vowsHarness = require('./lib/vows_harness.js');
+restmail = require('../../lib/restmail.js'),
+utils = require('../../lib/utils.js'),
+persona_urls = require('../../lib/urls.js'),
+CSS = require('../../lib/css.js'),
+dialog = require('../../lib/dialog.js'),
+vowsHarness = require('../../lib/vows_harness.js');
 
 // add fancy helper routines to wd
-require('./lib/wd-extensions.js');
+require('../../lib/wd-extensions.js');
 
 var browser = wd.remote();
 var eyedeemail = restmail.randomEmail(10, 'eyedee.me');
@@ -33,6 +33,8 @@ vowsHarness({
       .wwin(CSS['persona.org'].windowName)
       .wtype(CSS['dialog'].emailInput, eyedeemail)
       .wclick(CSS['dialog'].newEmailNextButton)
+      .wclick(CSS['dialog'].verifyWithPrimaryButton)
+      // for some reason, this button sometimes gets stuck. click it twice.
       .wclick(CSS['dialog'].verifyWithPrimaryButton)
       .wtype(CSS['eyedee.me'].newPassword, eyedeemail.split('@')[0])
       .wclick(CSS['eyedee.me'].createAccountButton, done);
