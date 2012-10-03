@@ -8,15 +8,15 @@ const
 path = require('path'),
 wd = require('wd'),
 assert = require('assert'),
-utils = require('./lib/utils.js'),
-persona_urls = require('./lib/urls.js'),
-CSS = require('./lib/css.js'),
-dialog = require('./lib/dialog.js'),
-vowsHarness = require('./lib/vows_harness.js'),
-personatestuser = require('./lib/personatestuser.js');
+utils = require('../lib/utils.js'),
+persona_urls = require('../lib/urls.js'),
+CSS = require('../lib/css.js'),
+dialog = require('../lib/dialog.js'),
+vowsHarness = require('../lib/vows_harness.js'),
+personatestuser = require('../lib/personatestuser.js');
 
 // add fancy helper routines to wd
-require('./lib/wd-extensions.js');
+require('../lib/wd-extensions.js');
 
 // TODO extract to setup function
 var sauceUser = process.env['SAUCE_USER'];
@@ -35,7 +35,7 @@ if (sauceUser && sauceKey) {
   });
   */
 } else { 
-  console.log('using local browser');
+  console.error('using local browser');
   var browser = wd.remote()
 }
 
@@ -99,11 +99,9 @@ vowsHarness({
       .wclick(CSS['persona.org'].passwordChangeDoneButton, done);
   },
   "wait for the change password button to go back before leaving": function(done) {
-      console.error('wait for the change password button to go back')
       browser.wfind(CSS['persona.org'].changePasswordButton, done);
   },
   "back to 123done": function(done) {
-    console.error('oh crap it worked')
     browser.get(persona_urls["123done"], done);
   },
   "click sign out and sign in": function(done) {
