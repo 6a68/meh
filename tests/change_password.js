@@ -70,7 +70,7 @@ vowsHarness({
   "verify we're logged in as the expected user": function(done) {
     browser.chain()
       .wwin()
-      .waitForElementText(CSS['123done.org'].currentlyLoggedInEmail, function(err, text) {
+      .wtext(CSS['123done.org'].currentlyLoggedInEmail, function(err, text) {
         assert.equal(text, testUser.email);
         done()
       });
