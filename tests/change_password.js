@@ -10,8 +10,8 @@ wd = require('wd'),
 assert = require('assert'),
 utils = require('../lib/utils.js'),
 persona_urls = require('../lib/urls.js'),
-CSS = require('../lib/css.js'),
-dialog = require('../lib/dialog.js'),
+CSS = require('../pages/css.js'),
+dialog = require('../pages/dialog.js'),
 vowsHarness = require('../lib/vows_harness.js'),
 personatestuser = require('../lib/personatestuser.js');
 

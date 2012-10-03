@@ -11,8 +11,8 @@ assert = require('assert'),
 restmail = require('../../lib/restmail.js'),
 utils = require('../../lib/utils.js'),
 persona_urls = require('../../lib/urls.js'),
-CSS = require('../../lib/css.js'),
-dialog = require('../../lib/dialog.js'),
+CSS = require('../../pages/css.js'),
+dialog = require('../../pages/dialog.js'),
 vowsHarness = require('../../lib/vows_harness.js');
 
 // add fancy helper routines to wd
